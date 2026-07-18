@@ -418,7 +418,11 @@ BR-Whitefield      34.7%      99.8%       imminent     SUSPECTED_FAULT
 
 ## Team
 
-**Team Astro_X**  
+**Team Astro_X** 
+Prajwal S
+Chaitanya BS
+karthik jasdeesh chandran
+
 IBM Z Datathon 2026 — Wildcard Entry
 
 ---
