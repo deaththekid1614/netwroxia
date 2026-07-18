@@ -237,11 +237,9 @@ Collects 15+ metric types every 10–30 seconds via Telegraf → InfluxDB 1.8.
 
 ---
 
-
-
+```
 ## Project Structure
 
-```
 netwroxia/
 │
 ├── run_pipeline.py              # One-command full pipeline runner
