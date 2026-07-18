@@ -424,7 +424,7 @@ Prajwal S
 
 mail id - prajwalastronaut@gmail.com
 
-Chaitanya BS
+Chaithanya BS
 
 mail id - chaithanyabs441@gmail.com
 
