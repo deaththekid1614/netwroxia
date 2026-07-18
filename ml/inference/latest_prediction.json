@@ -1,0 +1,119 @@
+{
+  "timestamp": "2026-07-18T09:29:17Z",
+  "models_used": {
+    "xgboost": "XGBClassifier",
+    "lstm": "LSTMPredictor"
+  },
+  "overall_status": "HEALTHY",
+  "routers_at_risk": 0,
+  "predictions": [
+    {
+      "router": "HO-Chennai",
+      "xgboost": {
+        "fault_probability": 0.017,
+        "predicted_fault": false,
+        "confidence": "LOW",
+        "status": "HEALTHY"
+      },
+      "lstm_forecast": {
+        "future_fault_probability": 0.006,
+        "predicted_future_fault": false,
+        "time_to_impact": "5.0 min",
+        "tti_raw_steps": 4.97,
+        "has_sequence_data": true,
+        "status": "HEALTHY"
+      },
+      "combined_alert": "NORMAL",
+      "top_feature": "state_ok",
+      "raw_metrics": {
+        "latency_ms": 0.07,
+        "packet_loss_pct": 0.0,
+        "ospf_neighbors": 0,
+        "bgp_established": true,
+        "cpu_pct": 0.0,
+        "mem_pct": 0.0
+      }
+    },
+    {
+      "router": "ZO-Bengaluru",
+      "xgboost": {
+        "fault_probability": 0.022,
+        "predicted_fault": false,
+        "confidence": "LOW",
+        "status": "HEALTHY"
+      },
+      "lstm_forecast": {
+        "future_fault_probability": 0.006,
+        "predicted_future_fault": false,
+        "time_to_impact": "5.0 min",
+        "tti_raw_steps": 4.99,
+        "has_sequence_data": true,
+        "status": "HEALTHY"
+      },
+      "combined_alert": "NORMAL",
+      "top_feature": "state_ok",
+      "raw_metrics": {
+        "latency_ms": 0.09,
+        "packet_loss_pct": 0.0,
+        "ospf_neighbors": 0,
+        "bgp_established": true,
+        "cpu_pct": 0.0,
+        "mem_pct": 0.0
+      }
+    },
+    {
+      "router": "BR-Koramangala",
+      "xgboost": {
+        "fault_probability": 0.017,
+        "predicted_fault": false,
+        "confidence": "LOW",
+        "status": "HEALTHY"
+      },
+      "lstm_forecast": {
+        "future_fault_probability": 0.007,
+        "predicted_future_fault": false,
+        "time_to_impact": "5.0 min",
+        "tti_raw_steps": 4.97,
+        "has_sequence_data": true,
+        "status": "HEALTHY"
+      },
+      "combined_alert": "NORMAL",
+      "top_feature": "state_ok",
+      "raw_metrics": {
+        "latency_ms": 0.07,
+        "packet_loss_pct": 0.0,
+        "ospf_neighbors": 0,
+        "bgp_established": true,
+        "cpu_pct": 0.0,
+        "mem_pct": 0.0
+      }
+    },
+    {
+      "router": "BR-Whitefield",
+      "xgboost": {
+        "fault_probability": 0.347,
+        "predicted_fault": false,
+        "confidence": "LOW",
+        "status": "HEALTHY"
+      },
+      "lstm_forecast": {
+        "future_fault_probability": 0.998,
+        "predicted_future_fault": true,
+        "time_to_impact": "imminent",
+        "tti_raw_steps": 0.0,
+        "has_sequence_data": true,
+        "status": "CRITICAL"
+      },
+      "combined_alert": "SUSPECTED_FAULT",
+      "top_feature": "percent_packet_loss",
+      "raw_metrics": {
+        "latency_ms": 0.0,
+        "packet_loss_pct": 100.0,
+        "ospf_neighbors": 0,
+        "bgp_established": true,
+        "cpu_pct": 0.0,
+        "mem_pct": 0.0
+      }
+    }
+  ]
+}

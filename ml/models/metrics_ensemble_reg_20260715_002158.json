@@ -1,0 +1,16 @@
+{
+  "model": "XGBoost_Regularized",
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "specificity": 1.0,
+  "auc": 1.0,
+  "avg_precision": 1.0,
+  "train_acc": 1.0,
+  "cv_avg_f1": 0.9983193277310924,
+  "cv_std_f1": 0.0033613445378151583,
+  "tp": 60,
+  "fp": 0,
+  "tn": 300,
+  "fn": 0
+}

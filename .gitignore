@@ -1,0 +1,4 @@
+
+# Large LLM model weights (download separately)
+*.gguf
+copilot/llm/*.gguf

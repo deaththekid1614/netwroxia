@@ -1,0 +1,36 @@
+name: netwroxia
+
+topology:
+  nodes:
+    ho-chennai:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - frr-configs/daemons:/etc/frr/daemons
+        - frr-configs/ho-chennai.conf:/etc/frr/frr.conf
+
+    zo-bengaluru:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - frr-configs/daemons:/etc/frr/daemons
+        - frr-configs/zo-bengaluru.conf:/etc/frr/frr.conf
+
+    br-koramangala:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - frr-configs/daemons:/etc/frr/daemons
+        - frr-configs/br-koramangala.conf:/etc/frr/frr.conf
+
+    br-whitefield:
+      kind: linux
+      image: frrouting/frr:latest
+      binds:
+        - frr-configs/daemons:/etc/frr/daemons
+        - frr-configs/br-whitefield.conf:/etc/frr/frr.conf
+
+  links:
+    - endpoints: ["ho-chennai:eth1", "zo-bengaluru:eth1"]
+    - endpoints: ["zo-bengaluru:eth2", "br-koramangala:eth1"]
+    - endpoints: ["zo-bengaluru:eth3", "br-whitefield:eth1"]

@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-07-18T09:29:20.305759Z",
+  "model": "mistral-7b-instruct-v0.2.Q4_K_M",
+  "mode": "fast",
+  "predictions_analyzed": 1,
+  "copilot_responses": [
+    {
+      "predicted_issue": "HO-Chennai to ZO-Bengaluru primary link saturation imminent \u2014 cascade failure risk",
+      "confidence": "HIGH",
+      "root_cause": "Link utilization trending toward 95% with sustained iperf3 flood pattern. BGP dampening not configured. Historical pattern matches INC-2024-0412 where peak UPI hours caused cascade failure across 3 zonal offices.",
+      "affected_sites": [
+        "ZO-Bengaluru",
+        "BR-Koramangala",
+        "BR-Whitefield",
+        "All Bengaluru zone ATMs (15+)",
+        "Trading floor backup"
+      ],
+      "affected_services": [
+        "Core Banking (CBS)",
+        "UPI/NPCI",
+        "NEFT/RTGS",
+        "ATM Network",
+        "Net Banking",
+        "Mobile Banking"
+      ],
+      "affected_users": 12500,
+      "time_to_impact_min": 4,
+      "urgency": "CRITICAL",
+      "recommended_actions": [
+        "1. IMMEDIATE: Apply BGP route dampening \u2014 vtysh -c 'bgp dampening 15 750 2000 60'",
+        "2. Reroute non-critical traffic (DR replication, HR apps) to SD-WAN Internet tunnel",
+        "3. Enable QoS prioritization for CBS and UPI traffic on remaining bandwidth"
+      ],
+      "quick_fix": "Throttle non-critical traffic + enable backup tunnel. Downtime: 0 seconds.",
+      "deep_fix": "Upgrade HO-ZO link from 1Gbps to 10Gbps. Implement traffic engineering with MPLS-TE. Schedule during RBI-mandated quarterly maintenance window.",
+      "rbi_compliance_note": "P1-CRITICAL. RBI/2023-24/85 mandates immediate action. >5 branches affected, >1000 customers, financial impact estimated \u20b925 lakh/hour. DR site must be ready for activation if primary link fails. Report to RBI within 2 hours.",
+      "router": "BR-Whitefield",
+      "timestamp": "2026-07-18T09:29:20.305672Z",
+      "model": "mistral-7b-instruct-v0.2.Q4_K_M (fast-mode)",
+      "note": "FAST MODE: Real Mistral output cached for demo speed"
+    }
+  ]
+}

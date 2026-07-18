@@ -1,0 +1,14 @@
+{
+  "model": "XGBoost",
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "specificity": 1.0,
+  "auc": 1.0,
+  "avg_precision": 1.0,
+  "train_acc": 1.0,
+  "tp": 39,
+  "fp": 0,
+  "tn": 270,
+  "fn": 0
+}

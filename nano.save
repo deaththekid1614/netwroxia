@@ -1,0 +1,174 @@
+"""
+Netwroxia Dashboard — Main Streamlit App
+One screen. Everything live. One "Run Pipeline" button.
+Auto-refreshes every 30 seconds.
+"""
+import streamlit as st
+import sys
+from pathlib import Path
+from datetime import datetime
+
+# ── Path Setup ──────────────────────────────────────────
+DASHBOARD_DIR = Path(__file__).parent.resolve()
+sys.path.insert(0, str(DASHBOARD_DIR))
+
+from utils.influx_client import get_latest_by_router
+from utils.pipeline_runner import run_pipeline, get_pipeline_status, get_prediction_json, get_copilot_json
+from components.status_badge import render_router_card
+from components.alert_card import render_all_alerts
+from components.metric_chart import render_metrics_tab
+from components.topology_graph import render_topology_tab
+
+# ── Helpers ─────────────────────────────────────────────
+def _rerun():
+    """Compatibility wrapper for Streamlit rerun."""
+    try:
+        st.rerun()
+    except Exception:
+        try:
+            st.experimental_rerun()
+        except Exception:
+            st.info("Please refresh the page manually.")
+
+# ── Page Config ─────────────────────────────────────────
+st.set_page_config(
+    page_title="Netwroxia NOC",
+    page_icon="🏦",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# ── Auto-Refresh (every 30 sec) ─────────────────────────
+st.markdown('<meta http-equiv="refresh" content="30">', unsafe_allow_html=True)
+
+# ── Dark Theme CSS ──────────────────────────────────────
+st.markdown("""
+<style>
+    .main { background-color: #0e1117; }
+    .stTabs [data-baseweb="tab-list"] { gap: 24px; }
+    .stTabs [data-baseweb="tab"] { font-size: 15px; font-weight: 600; }
+    h1, h2, h3, h4 { color: #fafafa !important; }
+</style>
+""", unsafe_allow_html=True)
+
+# ── Header ──────────────────────────────────────────────
+c1, c2, c3 = st.columns([3, 2, 2])
+with c1:
+    st.title("🏦 Netwroxia NOC")
+    st.caption("Air-Gapped Predictive AI Copilot for Banking Networks")
+with c2:
+    st.markdown(f"**🟢 LIVE**  \n`{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}`")
+with c3:
+    status = get_pipeline_status()
+    overall = status.get("overall_status", "UNKNOWN")
+    color = {"HEALTHY": "🟢", "WARNING": "🟡", "CRITICAL": "🔴"}.get(overall, "⚪")
+    st.markdown(f"**{color} {overall}**  \nAt Risk: `{status.get('routers_at_risk', 0)}`")
+
+st.divider()
+
+# ── RUN PIPELINE ────────────────────────────────────────
+if st.button("🚀 RUN PIPELINE"):
+    status_text = st.empty()
+    status_text.info("Starting pipeline... This takes ~60 seconds")
+    ok, results = run_pipeline(verbose=False)
+    
+    for i, r in enumerate(results):
+        status_text.info(f"{r['name']}... ({i+1}/{len(results)})")
+    
+    status_text.empty()
+    
+    if ok:
+        st.success("✅ Pipeline complete!")
+        st.balloons()
+        _rerun()
+    else:
+        st.error("❌ Pipeline failed.")
+        for r in results:
+            if not r["success"]:
+                err = r.get("error", "")[:300]
+                st.code(f"{r['name']}: {err}")
+
+st.divider()
+
+# ── Shared Data ─────────────────────────────────────────
+snapshot = get_latest_by_router()
+pred_data = get_prediction_json()
+predictions = {p.get("router"): p for p in pred_data.get("predictions", [])}
+copilot_data = get_copilot_json()
+responses = copilot_data.get("responses", []) if copilot_data else []
+
+# ── Tabs ────────────────────────────────────────────────
+tab_overview, tab_network, tab_predictions, tab_copilot, tab_metrics = st.tabs([
+    "🏠 Overview", "🌐 Network", "🔮 Predictions", "🤖 Copilot", "📊 Metrics"
+])
+
+# ── Overview ────────────────────────────────────────────
+with tab_overview:
+    st.subheader("🖥️ Router Health")
+    
+    for router in ["HO-Chennai", "ZO-Bengaluru", "BR-Koramangala", "BR-Whitefield"]:
+        metrics = snapshot.get(router, {})
+        pred = predictions.get(router, {})
+        xgb = pred.get("xgboost", {})
+        metrics["fault_probability"] = xgb.get("fault_probability", 0.0)
+        render_router_card(router, metrics)
+    
+    st.subheader("🤖 Latest Copilot Insight")
+    if responses:
+        r = responses[0]
+        st.info(
+            f"**{r.get('predicted_issue', 'No active issues')}**\n\n"
+            f"🎯 {r.get('root_cause', 'N/A')[:180]}...\n\n"
+            f"🔧 Quick Fix: `{r.get('quick_fix', 'N/A')}`"
+        )
+    else:
+        st.info("No copilot data. Click **RUN PIPELINE** to generate insights.")
+
+# ── Network ─────────────────────────────────────────────
+with tab_network:
+    render_topology_tab()
+
+# ── Predictions ─────────────────────────────────────────
+with tab_predictions:
+    render_all_alerts()
+
+# ── Copilot ─────────────────────────────────────────────
+with tab_copilot:
+    st.subheader("🤖 Full Copilot Analysis")
+    if responses:
+        for resp in responses:
+            title = resp.get("predicted_issue", "Analysis")
+            urgency = resp.get("urgency", "N/A")
+            with st.expander(f"{title} — {urgency}"):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(f"**Confidence:** `{resp.get('confidence', 'N/A')}`")
+                    st.markdown(f"**Urgency:** `{urgency}`")
+                    st.markdown(f"**Affected Users:** `{resp.get('affected_users', 'N/A')}`")
+                    st.markdown(f"**TTI:** `{resp.get('time_to_impact_min', 'N/A')} min`")
+                with col2:
+                    sites = resp.get("affected_sites", [])
+                    svcs = resp.get("affected_services", [])
+                    st.markdown(f"**Sites:** {', '.join(sites) if sites else 'N/A'}")
+                    st.markdown(f"**Services:** {', '.join(svcs) if svcs else 'N/A'}")
+                
+                st.markdown("**Root Cause:**")
+                st.write(resp.get("root_cause", "N/A"))
+                
+                st.markdown("**Recommended Actions:**")
+                for action in resp.get("recommended_actions", []):
+                    st.markdown(f"- {action}")
+                
+                st.markdown(f"**Quick Fix:** `{resp.get('quick_fix', 'N/A')}`")
+                st.markdown(f"**Deep Fix:** `{resp.get('deep_fix', 'N/A')}`")
+                st.markdown(f"**RBI Note:** {resp.get('rbi_compliance_note', 'N/A')}")
+    else:
+        st.info("Run the pipeline to see copilot analysis.")
+
+# ── Metrics ─────────────────────────────────────────────
+with tab_metrics:
+    render_metrics_tab()
+
+# ── Footer ──────────────────────────────────────────────
+st.divider()
+st.caption("Netwroxia v1.0 | IBM Z Datathon 2026 | Team Astro_X | 100% Air-Gapped 🏦")
