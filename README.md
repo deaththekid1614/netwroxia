@@ -415,6 +415,7 @@ BR-Whitefield      34.7%      99.8%       imminent     SUSPECTED_FAULT
 ```
 
 ---
+> **Developed on IBM BOB** — Primary development platform for the entire Netwroxia pipeline.
 
 ## Team
 
