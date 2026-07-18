@@ -237,6 +237,8 @@ Collects 15+ metric types every 10–30 seconds via Telegraf → InfluxDB 1.8.
 
 ---
 
+
+
 ## Project Structure
 
 ```
