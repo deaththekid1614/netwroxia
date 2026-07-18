@@ -428,7 +428,7 @@ Chaitanya BS
 
 mail id - chaithanyabs441@gmail.com
 
-karthik jasdeesh chandran
+karthik jasdeeschandran
 
 mail id - batkarthik646@gmail.com
 
