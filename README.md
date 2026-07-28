@@ -436,3 +436,9 @@ mail id - batkarthik646@gmail.com
 IBM Z Datathon 2026 — Wildcard Entry
 
 ---
+---
+link of skill build course completion certificate :
+
+https://drive.google.com/drive/folders/17fiJFdPNMi_Z5KJnOXYHcDDqiAR8ULRj?usp=drive_link
+
+---
