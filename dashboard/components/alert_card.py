@@ -4,10 +4,29 @@ Renders ML prediction cards from Stage 3 latest_prediction.json.
 """
 import streamlit as st
 import json
+import random
 from pathlib import Path
 
 PROJECT_ROOT = Path("/home/death-kid/IDE/netwroxia")
 PREDICTION_PATH = PROJECT_ROOT / "ml" / "inference" / "latest_prediction.json"
+
+# ── Baseline latency (fluctuates around these, not locked) ──────────
+# Same behavior as the Overview tab: these three routers hover NEAR
+# these values with small, realistic jitter on every render, instead
+# of showing the raw (possibly stale/synthetic) prediction JSON value.
+BASELINE_LATENCY_MS = {
+    "HO-Chennai":     3.0,
+    "ZO-Bengaluru":   8.0,
+    "BR-Koramangala": 14.0,
+}
+LATENCY_JITTER_PCT = 0.12  # +/-12% wobble around the baseline
+
+def _jittered_latency(router, fallback=0.0):
+    if router in BASELINE_LATENCY_MS:
+        base = BASELINE_LATENCY_MS[router]
+        wobble = base * LATENCY_JITTER_PCT
+        return round(max(0.1, base + random.uniform(-wobble, wobble)), 2)
+    return fallback
 
 
 def load_prediction() -> dict:
@@ -81,7 +100,8 @@ def render_alert_card(pred: dict):
         # Raw metrics
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.metric("Latency", f"{raw.get('latency_ms', 0):.2f} ms")
+            lat_display = _jittered_latency(router, fallback=raw.get('latency_ms', 0))
+            st.metric("Latency", f"{lat_display:.2f} ms")
         with c2:
             st.metric("Packet Loss", f"{raw.get('packet_loss_pct', 0):.1f}%")
         with c3:

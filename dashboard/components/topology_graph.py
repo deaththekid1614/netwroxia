@@ -40,9 +40,25 @@ def load_prediction() -> dict:
 
 
 def get_node_color(router: str, predictions: list) -> str:
-    """Return color based on prediction status."""
+    """Return color based on prediction status.
+
+    Fix: a router can be genuinely, fully down (BGP down + zero OSPF
+    neighbors, or 100% packet loss) while the ML `combined_alert` still
+    reads "SUSPECTED_FAULT"/"WARNING" (a probability-based label, not a
+    hard state check) — which was rendering a dead router as orange
+    instead of red. We now check the actual raw link state first and
+    force red whenever the router is truly down, before falling back to
+    the model's label.
+    """
     for p in predictions:
         if p.get("router") == router:
+            raw = p.get("raw_metrics", {})
+            bgp_down = not raw.get("bgp_established", True)
+            ospf_down = raw.get("ospf_neighbors", 1) == 0
+            loss_total = raw.get("packet_loss_pct", 0) >= 100
+            if (bgp_down and ospf_down) or loss_total:
+                return "#ff4444"  # hard down — always red
+
             combined = p.get("combined_alert", "NORMAL")
             if combined == "CRITICAL" or combined == "HIGH_CONFIDENCE_FAULT":
                 return "#ff4444"

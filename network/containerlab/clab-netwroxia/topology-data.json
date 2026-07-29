@@ -6,7 +6,7 @@
       "prefix": "clab",
       "mgmt": {
         "network": "clab",
-        "bridge": "br-efc292b04b2c",
+        "bridge": "br-9dc1c99d78fd",
         "ipv4-subnet": "172.20.20.0/24",
         "ipv4-gw": "172.20.20.1",
         "ipv6-subnet": "3fff:172:20:20::/64",
@@ -28,13 +28,13 @@
       "image": "frrouting/frr:latest",
       "mgmt-net": "",
       "mgmt-intf": "",
-      "mgmt-ipv4-address": "172.20.20.5",
+      "mgmt-ipv4-address": "172.20.20.3",
       "mgmt-ipv4-prefix-length": 24,
-      "mgmt-ipv6-address": "3fff:172:20:20::5",
+      "mgmt-ipv6-address": "3fff:172:20:20::3",
       "mgmt-ipv6-prefix-length": 64,
       "mac-address": "",
       "labels": {
-        "clab-mgmt-net-bridge": "br-efc292b04b2c",
+        "clab-mgmt-net-bridge": "br-9dc1c99d78fd",
         "clab-node-group": "",
         "clab-node-kind": "linux",
         "clab-node-lab-dir": "/home/death-kid/IDE/netwroxia/network/containerlab/clab-netwroxia/br-koramangala",
@@ -59,13 +59,13 @@
       "image": "frrouting/frr:latest",
       "mgmt-net": "",
       "mgmt-intf": "",
-      "mgmt-ipv4-address": "172.20.20.3",
+      "mgmt-ipv4-address": "172.20.20.2",
       "mgmt-ipv4-prefix-length": 24,
-      "mgmt-ipv6-address": "3fff:172:20:20::3",
+      "mgmt-ipv6-address": "3fff:172:20:20::2",
       "mgmt-ipv6-prefix-length": 64,
       "mac-address": "",
       "labels": {
-        "clab-mgmt-net-bridge": "br-efc292b04b2c",
+        "clab-mgmt-net-bridge": "br-9dc1c99d78fd",
         "clab-node-group": "",
         "clab-node-kind": "linux",
         "clab-node-lab-dir": "/home/death-kid/IDE/netwroxia/network/containerlab/clab-netwroxia/br-whitefield",
@@ -90,13 +90,13 @@
       "image": "frrouting/frr:latest",
       "mgmt-net": "",
       "mgmt-intf": "",
-      "mgmt-ipv4-address": "172.20.20.4",
+      "mgmt-ipv4-address": "172.20.20.5",
       "mgmt-ipv4-prefix-length": 24,
-      "mgmt-ipv6-address": "3fff:172:20:20::4",
+      "mgmt-ipv6-address": "3fff:172:20:20::5",
       "mgmt-ipv6-prefix-length": 64,
       "mac-address": "",
       "labels": {
-        "clab-mgmt-net-bridge": "br-efc292b04b2c",
+        "clab-mgmt-net-bridge": "br-9dc1c99d78fd",
         "clab-node-group": "",
         "clab-node-kind": "linux",
         "clab-node-lab-dir": "/home/death-kid/IDE/netwroxia/network/containerlab/clab-netwroxia/ho-chennai",
@@ -121,13 +121,13 @@
       "image": "frrouting/frr:latest",
       "mgmt-net": "",
       "mgmt-intf": "",
-      "mgmt-ipv4-address": "172.20.20.2",
+      "mgmt-ipv4-address": "172.20.20.4",
       "mgmt-ipv4-prefix-length": 24,
-      "mgmt-ipv6-address": "3fff:172:20:20::2",
+      "mgmt-ipv6-address": "3fff:172:20:20::4",
       "mgmt-ipv6-prefix-length": 64,
       "mac-address": "",
       "labels": {
-        "clab-mgmt-net-bridge": "br-efc292b04b2c",
+        "clab-mgmt-net-bridge": "br-9dc1c99d78fd",
         "clab-node-group": "",
         "clab-node-kind": "linux",
         "clab-node-lab-dir": "/home/death-kid/IDE/netwroxia/network/containerlab/clab-netwroxia/zo-bengaluru",
@@ -148,13 +148,13 @@
         "a": {
           "node": "ho-chennai",
           "interface": "eth1",
-          "mac": "aa:c1:ab:47:58:a2",
+          "mac": "aa:c1:ab:1c:89:04",
           "peer": "z"
         },
         "z": {
           "node": "zo-bengaluru",
           "interface": "eth1",
-          "mac": "aa:c1:ab:be:17:31",
+          "mac": "aa:c1:ab:71:a5:ef",
           "peer": "a"
         }
       }
@@ -164,13 +164,13 @@
         "a": {
           "node": "zo-bengaluru",
           "interface": "eth2",
-          "mac": "aa:c1:ab:0d:0c:4f",
+          "mac": "aa:c1:ab:64:4b:f4",
           "peer": "z"
         },
         "z": {
           "node": "br-koramangala",
           "interface": "eth1",
-          "mac": "aa:c1:ab:88:0d:de",
+          "mac": "aa:c1:ab:1e:f3:e7",
           "peer": "a"
         }
       }
@@ -180,13 +180,13 @@
         "a": {
           "node": "zo-bengaluru",
           "interface": "eth3",
-          "mac": "aa:c1:ab:84:e8:63",
+          "mac": "aa:c1:ab:de:4b:ca",
           "peer": "z"
         },
         "z": {
           "node": "br-whitefield",
           "interface": "eth1",
-          "mac": "aa:c1:ab:74:a0:28",
+          "mac": "aa:c1:ab:f7:78:e0",
           "peer": "a"
         }
       }

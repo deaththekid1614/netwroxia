@@ -132,7 +132,7 @@ def stage3():
     note("Why: Reactive alerts fire AFTER failure. We predict BEFORE impact.")
     note("Models: XGBoost (current fault classifier) + LSTM (time-to-impact forecaster)")
     note("Features: Latency, packet loss, OSPF neighbors, BGP state, CPU, memory")
-    sep()
+    sep() 
 
     section("3.1 Data Retrieval from InfluxDB")
     note("Querying last 24 hours of telemetry for training/inference...")

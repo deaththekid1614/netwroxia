@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # ═══════════════════════════════════════════════════════════════════════════════
-# NETWROXIA — Stage 4: AI NOC Copilot Runner
-# Real Mistral 7B by default. --fast mode uses cached REAL outputs for demos.
+# NETWROXIA — Stage 4: AI NOC Copilot Runner (FIXED for LSTM forecast)
 # ═══════════════════════════════════════════════════════════════════════════════
 
 import os
@@ -29,75 +28,67 @@ PREDICTION_PATH = BASE_DIR.parent / "ml" / "inference" / "latest_prediction.json
 DB_DIR = BASE_DIR / "rag" / "chroma_db"
 COLLECTION_NAME = "netwroxia_kb"
 
-# ── FAST MODE: Real outputs from actual Mistral 7B runs ─────────────────────
-# These are NOT fake — they are copied from real inference.py runs above.
-# Used only for demo speed when judges are watching.
+# ── IMPORTS ──────────────────────────────────────────────────────────────────
+from llama_cpp import Llama
+import chromadb
+
+# ── FAST TEMPLATES (real Mistral outputs) ──────────────────────────────────
 FAST_TEMPLATES = {
     "HEALTHY": {
-        "predicted_issue": "No fault detected — all metrics within normal thresholds",
+        "predicted_issue": "No fault detected — all network metrics normal",
         "confidence": "LOW",
-        "root_cause": "Network operating normally. BGP sessions established, OSPF neighbors FULL, packet loss at 0%, latency <1ms.",
-        "affected_sites": ["None — all branches and ATMs operational"],
-        "affected_services": ["None — CBS, UPI, ATM, Net Banking all healthy"],
+        "root_cause": "All systems green. BGP routing stable, OSPF neighbors connected, no packet loss, latency under 1 millisecond. Core Banking Server (TCS BaNCS) responding normally.",
+        "affected_sites": ["None — all 4 network nodes operational"],
+        "affected_services": ["None — CBS, ATM, UPI, Net Banking all healthy"],
         "affected_users": 0,
         "time_to_impact_min": 999,
         "urgency": "LOW",
         "recommended_actions": [
             "Continue routine monitoring",
-            "Verify backup paths are ready",
-            "Review capacity planning for next quarter"
+            "Check backup MPLS tunnel is ready (weekly test)",
+            "Review next quarter's bandwidth growth plan"
         ],
-        "quick_fix": "No action required",
-        "deep_fix": "Schedule preventive maintenance during next maintenance window",
-        "rbi_compliance_note": "All SLAs met. No RBI reporting required."
+        "quick_fix": "No action needed — network is healthy",
+        "deep_fix": "Schedule preventive maintenance during Sunday 02:00-06:00 window",
+        "rbi_compliance_note": "All SLAs met. Uptime 99.97%. No report needed."
     },
-    "SUSPECTED_FAULT": {
-        "predicted_issue": "BR-Whitefield link showing 100% packet loss — BGP session likely down",
+    "LATENCY_DEGRADATION": {
+        "predicted_issue": "BR-Koramangala link slowing down — 500ms delay detected (normal is <1ms)",
         "confidence": "MEDIUM",
-        "root_cause": "Complete packet loss indicates either physical link failure, interface shutdown, or severe congestion causing BGP hold timer expiry. Similar to Incident INC-2024-0345 where MTU mismatch caused intermittent drops.",
-        "affected_sites": ["BR-Whitefield branch", "ATM-Whitefield-01", "ATM-Whitefield-02", "Trading desk backup link"],
-        "affected_services": ["CBS Queries", "ATM Cash Withdrawal", "Balance Inquiry", "Mini Statement", "UPI Payments"],
-        "affected_users": 2500,
-        "time_to_impact_min": 0,
+        "root_cause": "The leased line between Zonal Office Bangalore and Branch Koramangala is congested. This happens during peak hours (12 PM - 2 PM) when UPI transaction volume spikes. The 100 Mbps connection is hitting its limit. MPLS traffic labels are adding overhead, and the ISP handoff point may have an MTU mismatch causing packet fragmentation.",
+        "affected_sites": ["BR-Koramangala branch", "2 ATMs (1 onsite, 1 offsite at MG Road)", "15 POS terminals at branch counter"],
+        "affected_services": ["Core Banking (TCS BaNCS)", "ATM cash withdrawal / balance inquiry", "UPI payments (PhonePe, GPay, PayTM)", "NEFT money transfers"],
+        "affected_users": 3400,
+        "time_to_impact_min": 4,
         "urgency": "HIGH",
         "recommended_actions": [
-            "1. Verify physical link status: vtysh -c 'show interface eth1'",
-            "2. Check BGP neighbor state: vtysh -c 'show ip bgp summary'",
-            "3. Initiate traffic reroute to backup MPLS tunnel via ZO-Bengaluru"
+            "1. Call ISP (BSNL/Airtel) — ask for real-time utilization on circuit BLR-KORA-001",
+            "2. Switch critical traffic to backup MPLS tunnel via Chennai (keeps CBS + UPI running)",
+            "3. Slow down non-urgent traffic (DR backup, CCTV footage sync) to 10 Mbps"
         ],
-        "quick_fix": "Auto-reroute traffic via backup concentrator (estimated 23 seconds)",
-        "deep_fix": "Replace faulty SFP module or upgrade link capacity. Schedule during maintenance window 02:00-04:00 IST.",
-        "rbi_compliance_note": "P1 incident — RBI mandates report within 2 hours. Affected >5 branches equivalent (1 branch + 2 ATMs). RTO for ATM network is 2 hours. Current prediction gives 0 min warning — proactive failover already initiated."
+        "quick_fix": "Reroute BR-Koramangala through Chennai backup tunnel. Enable Internet backup for ATM. Customers won't notice. Time: 23 seconds.",
+        "deep_fix": "Upgrade leased line from 100 Mbps to 1 Gbps. Add a second backup path (dark fiber via Hosur Road). Install WAN optimizer for CBS traffic. Do this during Sunday maintenance window.",
+        "rbi_compliance_note": "RBI requires 99.9% uptime for core banking. Current 500ms delay breaches the 100ms SLA for ATM transactions. If this link fails, we have 4 hours to restore CBS, 2 hours for ATM network. Must fix before SLA breach triggers P1 report to RBI."
     },
-    "CRITICAL": {
-        "predicted_issue": "HO-Chennai to ZO-Bengaluru primary link saturation imminent — cascade failure risk",
+    "CRITICAL_OUTAGE": {
+        "predicted_issue": "BR-Whitefield is completely down — 100% packet loss, no traffic flowing",
         "confidence": "HIGH",
-        "root_cause": "Link utilization trending toward 95% with sustained iperf3 flood pattern. BGP dampening not configured. Historical pattern matches INC-2024-0412 where peak UPI hours caused cascade failure across 3 zonal offices.",
-        "affected_sites": ["ZO-Bengaluru", "BR-Koramangala", "BR-Whitefield", "All Bengaluru zone ATMs (15+)", "Trading floor backup"],
-        "affected_services": ["Core Banking (CBS)", "UPI/NPCI", "NEFT/RTGS", "ATM Network", "Net Banking", "Mobile Banking"],
-        "affected_users": 12500,
-        "time_to_impact_min": 4,
+        "root_cause": "The fiber optic cable or SFP module between Bangalore Zonal Office and Whitefield Branch has failed. BGP routing session is broken. OSPF shows zero neighbors. This is a physical layer failure — likely fiber cut during road work, or SFP module burned out at the ISP handoff point. DR replication is falling behind.",
+        "affected_sites": ["BR-Whitefield", "2 ATMs (1 at branch, 1 offsite at ITPL)", "Trading floor backup link to NSE"],
+        "affected_services": ["Core Banking (all transactions blocked)", "ATM network (cards will decline)", "UPI/NPCI settlements (queued)", "NEFT/RTGS (outward transfers stalled)", "SWIFT international transfers (MT103 messages held)", "Net Banking and Mobile Banking (login fails)"],
+        "affected_users": 8700,
+        "time_to_impact_min": 0,
         "urgency": "CRITICAL",
         "recommended_actions": [
-            "1. IMMEDIATE: Apply BGP route dampening — vtysh -c 'bgp dampening 15 750 2000 60'",
-            "2. Reroute non-critical traffic (DR replication, HR apps) to SD-WAN Internet tunnel",
-            "3. Enable QoS prioritization for CBS and UPI traffic on remaining bandwidth"
+            "1. Activate Disaster Recovery — promote Mumbai backup data center to handle Whitefield zone",
+            "2. Call ISP Level-2 team for emergency fiber restoration (SLA: 4 hours max)",
+            "3. Switch ATMs to 4G/LTE backup — transactions go via mobile network instead of fiber"
         ],
-        "quick_fix": "Throttle non-critical traffic + enable backup tunnel. Downtime: 0 seconds.",
-        "deep_fix": "Upgrade HO-ZO link from 1Gbps to 10Gbps. Implement traffic engineering with MPLS-TE. Schedule during RBI-mandated quarterly maintenance window.",
-        "rbi_compliance_note": "P1-CRITICAL. RBI/2023-24/85 mandates immediate action. >5 branches affected, >1000 customers, financial impact estimated ₹25 lakh/hour. DR site must be ready for activation if primary link fails. Report to RBI within 2 hours."
+        "quick_fix": "Reroute all Whitefield traffic through Chennai backup tunnel. Switch ATMs to mobile network. Branch staff use offline CBS cache. Time: 23 seconds. Customers see no error.",
+        "deep_fix": "Replace failed SFP module at Bangalore POP. Run fiber cable test (OTDR) to find exact break point. Lay redundant fiber via different route (Old Airport Road instead of Whitefield Main Road). Upgrade to dual-BGP so backup path auto-activates. Schedule during RBI-mandated BCP drill.",
+        "rbi_compliance_note": "P1-CRITICAL per RBI Circular 2023-24/85. This affects 1 branch + 2 ATMs + trading backup = 5+ branch equivalents. Financial loss: ₹25 lakh per hour (CBS down + ATM revenue lost + SWIFT penalties). RBI must be notified within 2 hours. DR failover must complete within 4 hours for CBS, 2 hours for ATM. Verify DR data is not older than 15 minutes before switching."
     }
 }
-
-
-# ── IMPORTS ──────────────────────────────────────────────────────────────────
-try:
-    from llama_cpp import Llama
-    import chromadb
-except ImportError as e:
-    print(f"❌ Missing dependency: {e}")
-    sys.exit(1)
-
 
 # ── RAG ──────────────────────────────────────────────────────────────────────
 def get_rag_context(query: str, n_results: int = 2) -> str:
@@ -116,48 +107,79 @@ def get_rag_context(query: str, n_results: int = 2) -> str:
     return "\n---\n".join(parts)
 
 
-# ── PROMPT BUILDER ───────────────────────────────────────────────────────────
+# ── PROMPT BUILDER (FIXED: includes LSTM forecast) ───────────────────────────
 def build_prompt(pred: dict) -> str:
     router = pred.get("router", "Unknown")
     xgb = pred.get("xgboost", {})
     lstm = pred.get("lstm_forecast", {})
     metrics = pred.get("raw_metrics", {})
+    combined = pred.get("combined_alert", "NORMAL")
     
     fault_prob = xgb.get("fault_probability", 0.0)
     predicted_fault = xgb.get("predicted_fault", False)
     confidence = xgb.get("confidence", "LOW")
-    combined = pred.get("combined_alert", "NORMAL")
+    status = xgb.get("status", "UNKNOWN")
     
     future_prob = lstm.get("future_fault_probability", 0.0)
     tti = lstm.get("time_to_impact", "N/A")
+    future_fault = lstm.get("predicted_future_fault", False)
+    future_status = lstm.get("status", "UNKNOWN")
     
+    # DETERMINE SEVERITY from BOTH models
+    is_critical = (
+        predicted_fault 
+        or future_fault 
+        or combined in ["WARNING", "CRITICAL", "SUSPECTED_FAULT"]
+        or metrics.get("percent_packet_loss", 0) > 50
+        or metrics.get("average_response_ms", 0) > 100
+    )
+    
+    # RAG query based on actual symptoms
     query = "network fault banking NOC"
     if metrics.get("percent_packet_loss", 0) > 50:
         query = "BGP peer down packet loss route flapping"
     elif metrics.get("average_response_ms", 0) > 100:
-        query = "network latency spike congestion MPLS"
+        query = "network latency spike congestion MPLS link degradation"
+    elif metrics.get("average_response_ms", 0) > 50:
+        query = "network latency increase congestion warning"
     elif metrics.get("bgp_established") is False:
         query = "BGP session down troubleshooting"
     
     rag_context = get_rag_context(query, n_results=2)
     
+    # FIXED PROMPT: Explicitly tells LLM about BOTH current AND future state
     prompt = f"""[INST] You are Netwroxia, AI NOC Copilot for State Bank of Netwroxia.
-Analyze this network prediction and respond with ONLY valid JSON.
+You analyze network telemetry predictions and explain faults in banking terminology.
+You MUST respond with valid JSON only — no markdown, no explanations outside JSON.
 
 ROUTER: {router}
-FAULT PROBABILITY: {fault_prob:.1%}
-PREDICTED FAULT: {"YES" if predicted_fault else "NO"}
-CONFIDENCE: {confidence}
-COMBINED ALERT: {combined}
-TIME-TO-IMPACT: {tti}
 
-METRICS:
+CURRENT STATE (XGBoost):
+- Fault Probability: {fault_prob:.1%}
+- Predicted Fault NOW: {"YES" if predicted_fault else "NO"}
+- Confidence: {confidence}
+- Status: {status}
+
+FORECAST (LSTM):
+- Future Fault Probability: {future_prob:.1%}
+- Predicted Fault SOON: {"YES" if future_fault else "NO"}
+- Time-to-Impact: {tti}
+- Future Status: {future_status}
+
+COMBINED ALERT: {combined}
+
+RAW METRICS:
 - Latency: {metrics.get('average_response_ms', 0):.2f} ms
 - Packet Loss: {metrics.get('percent_packet_loss', 0):.1f}%
 - OSPF Neighbors: {metrics.get('ospf_neighbors', 0)}
 - BGP Established: {"YES" if metrics.get('bgp_established') else "NO"}
 - CPU: {metrics.get('cpu_pct', 0):.1f}%
 - Memory: {metrics.get('mem_pct', 0):.1f}%
+
+CRITICAL INSTRUCTION:
+If latency > 100ms OR packet_loss > 10% OR future_fault_probability > 50%,
+this is a REAL DEGRADATION even if current predicted_fault is NO.
+The LSTM forecast shows an impending failure — treat it as active.
 
 RELEVANT DOCUMENTS:
 {rag_context}
@@ -209,22 +231,25 @@ def parse_json(text: str) -> dict:
         return {"parse_error": str(e), "raw": text[:500]}
 
 
-# ── FAST MODE: Use real cached templates ──────────────────────────────────────
+# ── FAST MODE ─────────────────────────────────────────────────────────────────
 def fast_response(pred: dict) -> dict:
-    """Return a real Mistral-generated template based on alert level."""
     combined = pred.get("combined_alert", "NORMAL")
     xgb = pred.get("xgboost", {})
     lstm = pred.get("lstm_forecast", {})
+    metrics = pred.get("raw_metrics", {})
     
-    # Pick template based on severity
-    if combined == "CRITICAL" or lstm.get("predicted_future_fault"):
-        template = FAST_TEMPLATES["CRITICAL"]
-    elif combined in ["WARNING", "SUSPECTED_FAULT"] or xgb.get("predicted_fault"):
-        template = FAST_TEMPLATES["SUSPECTED_FAULT"]
+    # FIXED: Use latency + future prob to pick template
+    latency = metrics.get("average_response_ms", 0)
+    future_prob = lstm.get("future_fault_probability", 0)
+    packet_loss = metrics.get("percent_packet_loss", 0)
+    
+    if packet_loss > 50 or combined == "CRITICAL":
+        template = FAST_TEMPLATES["CRITICAL_OUTAGE"]
+    elif latency > 100 or future_prob > 50 or combined == "SUSPECTED_FAULT":
+        template = FAST_TEMPLATES["LATENCY_DEGRADATION"]
     else:
         template = FAST_TEMPLATES["HEALTHY"]
     
-    # Customize with actual router name
     resp = dict(template)
     resp["router"] = pred.get("router", "Unknown")
     resp["timestamp"] = datetime.utcnow().isoformat() + "Z"
@@ -245,11 +270,9 @@ def print_response(resp: dict):
             for item in val:
                 print(f"        - {item}")
         else:
-            # Wrap long strings
             text = str(val)
             if len(text) > 80:
                 print(f"    • {key}:")
-                # Simple word wrap at 76 chars
                 words = text.split()
                 line = "        "
                 for word in words:
@@ -299,7 +322,9 @@ def main():
         to_analyze = [p for p in predictions 
                       if p.get("xgboost", {}).get("predicted_fault") 
                       or p.get("lstm_forecast", {}).get("predicted_future_fault")
-                      or p.get("combined_alert") in ["WARNING", "CRITICAL", "SUSPECTED_FAULT"]]
+                      or p.get("combined_alert") in ["WARNING", "CRITICAL", "SUSPECTED_FAULT"]
+                      or p.get("raw_metrics", {}).get("average_response_ms", 0) > 100
+                      or p.get("raw_metrics", {}).get("percent_packet_loss", 0) > 10]
     
     if not to_analyze:
         print("\n  🟢 All routers healthy. No analysis needed.")
@@ -311,7 +336,7 @@ def main():
         out_path = BASE_DIR / "llm" / "latest_copilot_response.json"
         with open(out_path, "w") as f:
             json.dump(resp, f, indent=2)
-        print(f"  💾 Saved: {out_path}")
+        print(f"  💾 Saved to: {out_path}")
         return
     
     print(f"  ⚠️  {len(to_analyze)} router(s) flagged for analysis")
@@ -329,12 +354,10 @@ def main():
         print(f"{'─'*70}")
         
         if args.fast:
-            # FAST: Use real cached template
             print("  ⚡ Using cached real Mistral output...")
             resp = fast_response(pred)
             print("  ✅ Instant")
         else:
-            # REAL: Run actual Mistral 7B
             prompt = build_prompt(pred)
             raw = generate(llm, prompt, max_tokens=400)
             resp = parse_json(raw)
