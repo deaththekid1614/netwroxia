@@ -504,27 +504,6 @@ A fully functional 4-node Tier-1 Indian bank network using Containerlab + FRRout
 
 ---
 
-## 🎬 Demo Script (3-Minute Pitch)
-
-### Opening (30 sec)
-> "Every night, bank NOC engineers watch screens waiting for alerts that only fire AFTER an ATM goes down. We're changing that. This is Netwroxia — the first fully air-gapped, predictive AI NOC copilot for banking."
-
-### Live Demo (2 min)
-1. **Show topology** — "State Bank of Netwroxia: HO Chennai, ZO Bangalore, 2 branches"
-2. **Inject fault** — `inject_faults.py latency -l ho-zo -v 100`
-3. **Watch prediction** — Dashboard shows: "Link saturation predicted in 4.2 min, 91% confidence"
-4. **Open copilot** — "What's happening with Bangalore zone?"
-5. **Copilot responds** — Structured diagnosis + quick fix + deep fix + RBI compliance
-6. **Show air-gap** — `ping 8.8.8.8` fails = truly offline. Copilot still works.
-
-### Impact (30 sec)
-- **91% precision**, **5.2 min average lead time**, **<4% false positive rate**
-- **23-second auto-remediation** — customers never know there was a problem
-- **₹50 lakh saved per prevented outage**
-- **Zero cloud dependency** — works in the most secure banking environments
-
----
-
 ## 📊 Evaluation Metrics
 
 | Dimension | Metric | Value |
