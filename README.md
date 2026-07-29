@@ -599,7 +599,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 ---
 
-## 🙏 Acknowledgements
+## 🙏 Acknowledgements.
 
 - [Containerlab](https://containerlab.dev/) for network simulation
 - [FRRouting](https://frrouting.org/) for open-source routing stack
