@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-24T14:13:37Z",
+  "timestamp": "2026-07-30T04:45:00Z",
   "models_used": {
     "xgboost": "XGBClassifier",
     "lstm": "LSTMPredictor"
@@ -16,17 +16,17 @@
         "status": "HEALTHY"
       },
       "lstm_forecast": {
-        "future_fault_probability": 0.007,
+        "future_fault_probability": 0.005,
         "predicted_future_fault": false,
         "time_to_impact": "5.0 min",
-        "tti_raw_steps": 4.96,
+        "tti_raw_steps": 4.99,
         "has_sequence_data": true,
         "status": "HEALTHY"
       },
       "combined_alert": "NORMAL",
       "top_feature": "state_ok",
       "raw_metrics": {
-        "latency_ms": 0.09,
+        "latency_ms": 0.11,
         "packet_loss_pct": 0.0,
         "ospf_neighbors": 0,
         "bgp_established": true,
@@ -53,7 +53,7 @@
       "combined_alert": "NORMAL",
       "top_feature": "state_ok",
       "raw_metrics": {
-        "latency_ms": 0.16,
+        "latency_ms": 0.07,
         "packet_loss_pct": 0.0,
         "ospf_neighbors": 0,
         "bgp_established": true,
@@ -70,17 +70,17 @@
         "status": "HEALTHY"
       },
       "lstm_forecast": {
-        "future_fault_probability": 0.007,
+        "future_fault_probability": 0.0,
         "predicted_future_fault": false,
         "time_to_impact": "5.0 min",
-        "tti_raw_steps": 4.97,
+        "tti_raw_steps": 4.98,
         "has_sequence_data": true,
         "status": "HEALTHY"
       },
       "combined_alert": "NORMAL",
       "top_feature": "state_ok",
       "raw_metrics": {
-        "latency_ms": 0.1,
+        "latency_ms": 0.07,
         "packet_loss_pct": 0.0,
         "ospf_neighbors": 0,
         "bgp_established": true,
