@@ -2,6 +2,7 @@
 Netwroxia Dashboard — Mission-Control UI
 UI + data-binding fixes only. Backend pipeline logic untouched.
 IBM Z Datathon 2026 · NETWROXIA
+With graphs
 """
 import math
 import base64
