@@ -419,7 +419,7 @@ wget https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/
 
 ---
 
-## 📈 6-Stage Pipeline
+## 📈 6-Stage Pipeline..
 
 ### Stage 1: Simulated Banking Network
 A fully functional 4-node Tier-1 Indian bank network using Containerlab + FRRouting.
