@@ -598,17 +598,6 @@ BR-Whitefield      34.7%      99.8%       imminent     SUSPECTED_FAULT
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
-
-##  Acknowledgements.
-
-- [Containerlab](https://containerlab.dev/) for network simulation
-- [FRRouting](https://frrouting.org/) for open-source routing stack
-- [TheBloke](https://huggingface.co/TheBloke) for quantized LLM models
-- [InfluxData](https://www.influxdata.com/) for time-series database
-- IBM Z Datathon 2026 organizers
-
----
-
 <p align="center">
   <b>NETWROXIA</b> — Predict · Prevent · Protect<br>
   <sub>Banking Network Copilot · 100% Air-Gapped · Zero Cloud</sub>
